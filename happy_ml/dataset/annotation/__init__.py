@@ -224,6 +224,9 @@ class Annotation(Generic[T]):
         raise NotImplementedError()
 
 
+DefaultImageShape = (224, 224, 3)
+
+
 class ImageAnnotation(Annotation[T]):
     __slots__ = ('_image_shape', '_image')
 
@@ -249,7 +252,7 @@ class ImageAnnotation(Annotation[T]):
     @classmethod
     def create_empty(
             cls,
-            image_shape: Tuple[int, int, int] = (160, 160, 3),
+            image_shape: Tuple[int, int, int] = DefaultImageShape,
     ) -> 'ImageAnnotation[np.ndarray]':
         return cls(
             annotated=False,
@@ -260,7 +263,7 @@ class ImageAnnotation(Annotation[T]):
     @classmethod
     def create_random(
             cls,
-            image_shape: Tuple[int, int, int] = (160, 160, 3),
+            image_shape: Tuple[int, int, int] = DefaultImageShape,
     ) -> 'ImageAnnotation[np.ndarray]':
         return cls(
             annotated=random_bool_numpy(),
