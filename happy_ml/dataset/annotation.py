@@ -138,18 +138,18 @@ def random_bool_numpy() -> bool:
 
 
 class Annotation(Generic[T]):
-    __slots__ = ('_annotated',)
+    __slots__ = ('annotated',)
+
+    _defaults = {
+        'annotated': False
+    }
 
     def __init__(self, annotated: ScalarBoolType):
-        self._annotated = bool_as_numpy(annotated)
+        self.annotated = bool_as_numpy(annotated)
 
     @property
     def is_annotated(self) -> T:
-        return self._annotated
-
-    @property
-    def is_collated(self) -> bool:
-        return len(self._annotated.shape) > 1
+        return self.annotated
 
     def to_dict(self) -> Dict[str, T]:
         return {'annotated': self._annotated}
@@ -167,9 +167,6 @@ class Annotation(Generic[T]):
         )
 
     def __getitem__(self: A, index: int) -> A:
-        if not self.is_collated:
-            raise Exception('Only collated annotation can be indexed.')
-
         values = collect_attribute_values(self)
         values_slice = [value[index] for value in values]
 
@@ -224,19 +221,27 @@ class Annotation(Generic[T]):
         raise NotImplementedError()
 
 
+DefaultImageShape = (224, 224, 3)
+
+
 class ImageAnnotation(Annotation[T]):
-    __slots__ = ('_image_shape', '_image')
+    __slots__ = ('image_shape', 'image')
 
-    def __init__(
-            self,
-            annotated: ScalarBoolType,
-            image_shape: Tuple[int, int, int],
-            image: Optional[T],
-    ):
-        super().__init__(annotated)
+    default = {
+        'image_shape': (224, 224, 3),
+        'image': np.zeros((224, 224, 3), dtype=np.uint8),
+    }
 
-        self._image_shape = np.array(image_shape) if isinstance(image_shape, Tuple) else image_shape
-        self._image = image if image is not None else self.zero_image(image_shape)
+    # def __init__(
+    #         self,
+    #         annotated: ScalarBoolType,
+    #         image_shape: Tuple[int, int, int],
+    #         image: Optional[T],
+    # ):
+    #     super().__init__(annotated)
+    #
+    #     self._image_shape = np.array(image_shape) if isinstance(image_shape, Tuple) else image_shape
+    #     self._image = image if image is not None else self.zero_image(image_shape)
 
     @property
     def image(self) -> Optional[T]:
@@ -249,7 +254,7 @@ class ImageAnnotation(Annotation[T]):
     @classmethod
     def create_empty(
             cls,
-            image_shape: Tuple[int, int, int] = (160, 160, 3),
+            image_shape: Tuple[int, int, int] = DefaultImageShape,
     ) -> 'ImageAnnotation[np.ndarray]':
         return cls(
             annotated=False,
@@ -260,7 +265,7 @@ class ImageAnnotation(Annotation[T]):
     @classmethod
     def create_random(
             cls,
-            image_shape: Tuple[int, int, int] = (160, 160, 3),
+            image_shape: Tuple[int, int, int] = DefaultImageShape,
     ) -> 'ImageAnnotation[np.ndarray]':
         return cls(
             annotated=random_bool_numpy(),

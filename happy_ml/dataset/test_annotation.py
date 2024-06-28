@@ -42,7 +42,6 @@ class AnnotationBaseTestCases(unittest.TestCase):
                 for _ in range(number_to_collate)
             ]
             collated_to_numpy = annotation.collate_to_numpy(annotations, safe=True)
-            assert collated_to_numpy.is_collated
             AnnotationBaseTestCases._check_collated_values(annotations, collated_to_numpy, number_to_collate)
 
     def test_collation_to_tensor(self):
@@ -55,7 +54,6 @@ class AnnotationBaseTestCases(unittest.TestCase):
                 for _ in range(number_to_collate)
             ]
             collated = annotation.collate_to_tensor(annotations, safe=True)
-            assert collated.is_collated
 
             # check each attribute value to be equal
             AnnotationBaseTestCases._check_collated_values(annotations, collated, number_to_collate)
